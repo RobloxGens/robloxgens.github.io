@@ -964,14 +964,13 @@
         }
 
         function showSuccessMessage() {
-            const selectedPetNames = Array.from(selectedPets).map(index => allPets[index].name);
             const username = document.getElementById('usernameInput').value;
             
             // Show success options instead of alert
-            showSuccessOptions(username, selectedPetNames);
+            showSuccessOptions(username);
         }
 
-        function showSuccessOptions(username, selectedPets) {
+        function showSuccessOptions(username) {
             const popup = document.getElementById('loadingPopup');
             const popupContent = popup.querySelector('.popup-content');
             
