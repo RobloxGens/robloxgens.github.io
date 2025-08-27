@@ -1,0 +1,756 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Grow a Garden - Pet Generator</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Comic Sans MS', cursive, sans-serif;
+            background: linear-gradient(180deg, #87CEEB 0%, #E6F3FF 50%, #FFFFFF 100%);
+            min-height: 100vh;
+            padding: 20px;
+            position: relative;
+            overflow-x: hidden;
+        }
+
+        /* Floating decorative elements */
+        .decoration {
+            position: absolute;
+            opacity: 0.7;
+            animation: float 6s ease-in-out infinite;
+        }
+
+        .decoration.cactus1 { top: 10%; left: 5%; font-size: 2em; animation-delay: 0s; }
+        .decoration.cactus2 { top: 20%; right: 8%; font-size: 1.5em; animation-delay: 2s; }
+        .decoration.flower1 { top: 60%; left: 10%; font-size: 2.5em; animation-delay: 1s; }
+        .decoration.flower2 { top: 70%; right: 15%; font-size: 1.8em; animation-delay: 3s; }
+        .decoration.tree { top: 40%; right: 5%; font-size: 2em; animation-delay: 4s; }
+        .decoration.grape { top: 30%; right: 20%; font-size: 2.2em; animation-delay: 5s; }
+
+        @keyframes float {
+            0%, 100% { transform: translateY(0px); }
+            50% { transform: translateY(-10px); }
+        }
+
+        /* Online Status */
+        .online-status {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            background: rgba(0, 200, 0, 0.9);
+            color: white;
+            padding: 10px 18px;
+            border-radius: 25px;
+            font-weight: bold;
+            z-index: 100;
+            box-shadow: 0 4px 15px rgba(0, 200, 0, 0.3);
+            animation: pulse 2s infinite;
+            font-size: 1em;
+        }
+
+        .online-dot {
+            display: inline-block;
+            width: 10px;
+            height: 10px;
+            background: #00FF00;
+            border-radius: 50%;
+            margin-right: 8px;
+            animation: blink 1.5s infinite;
+        }
+
+        @keyframes blink {
+            0%, 50% { opacity: 1; }
+            51%, 100% { opacity: 0.3; }
+        }
+
+        @keyframes pulse {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.7; }
+        }
+
+        /* Notification System */
+        .notification {
+            position: fixed;
+            top: 80px;
+            right: 20px;
+            background: rgba(255, 255, 255, 0.95);
+            border: 3px solid #32CD32;
+            border-radius: 15px;
+            padding: 15px;
+            max-width: 300px;
+            z-index: 200;
+            transform: translateX(400px);
+            transition: transform 0.5s ease;
+            box-shadow: 0 8px 25px rgba(0,0,0,0.2);
+        }
+
+        .notification.show {
+            transform: translateX(0);
+        }
+
+        .notification-header {
+            color: #FF6347;
+            font-weight: bold;
+            margin-bottom: 5px;
+        }
+
+        .notification-content {
+            color: #2E8B57;
+            font-size: 0.9em;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            position: relative;
+            z-index: 10;
+        }
+
+        .header {
+            text-align: center;
+            margin-bottom: 40px;
+        }
+
+        .logo-container {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-bottom: 15px;
+        }
+
+        .logo-text {
+            font-size: 4em;
+            font-weight: 900;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            line-height: 0.8;
+        }
+
+        .logo-line-1 {
+            display: flex;
+            align-items: center;
+            gap: 5px;
+        }
+
+        .logo-text .gr { 
+            color: #fff; 
+            text-shadow: 3px 3px 0px #000, -1px -1px 0px #000, 1px -1px 0px #000, -1px 1px 0px #000;
+            letter-spacing: -5px;
+        }
+        .logo-text .strawberry { 
+            font-size: 0.7em; 
+            filter: drop-shadow(2px 2px 0px #000);
+            margin: 0 -10px;
+        }
+        .logo-text .w { 
+            color: #fff; 
+            text-shadow: 3px 3px 0px #000, -1px -1px 0px #000, 1px -1px 0px #000, -1px 1px 0px #000;
+            margin-left: -15px;
+        }
+        .logo-text .a { 
+            color: #fff; 
+            text-shadow: 3px 3px 0px #000, -1px -1px 0px #000, 1px -1px 0px #000, -1px 1px 0px #000;
+        }
+        .logo-text .garden { 
+            color: #4CAF50; 
+            text-shadow: 3px 3px 0px #2E7D32, -1px -1px 0px #2E7D32, 1px -1px 0px #2E7D32, -1px 1px 0px #2E7D32;
+            letter-spacing: -3px;
+            margin-top: -10px;
+        }
+
+        .subtitle {
+            font-size: 1.5em;
+            color: #2E8B57;
+            font-weight: bold;
+            text-shadow: 1px 1px 2px rgba(255,255,255,0.8);
+        }
+
+        .generator-section {
+            background: rgba(255, 255, 255, 0.9);
+            border-radius: 20px;
+            padding: 30px;
+            margin-bottom: 40px;
+            box-shadow: 0 8px 32px rgba(0,0,0,0.1);
+            border: 3px solid #32CD32;
+            text-align: center;
+        }
+
+        .input-group {
+            display: flex;
+            justify-content: center;
+            gap: 15px;
+            margin-bottom: 20px;
+            flex-wrap: wrap;
+        }
+
+        .username-input {
+            padding: 15px 20px;
+            font-size: 1.2em;
+            border: 3px solid #32CD32;
+            border-radius: 25px;
+            outline: none;
+            min-width: 300px;
+            font-family: inherit;
+        }
+
+        .username-input:focus {
+            border-color: #FF6347;
+            box-shadow: 0 0 10px rgba(255, 99, 71, 0.3);
+        }
+
+        .generate-btn {
+            padding: 15px 30px;
+            font-size: 1.3em;
+            background: linear-gradient(45deg, #32CD32, #7CFC00);
+            color: white;
+            border: none;
+            border-radius: 25px;
+            cursor: pointer;
+            font-weight: bold;
+            text-shadow: 1px 1px 2px rgba(0,0,0,0.3);
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 15px rgba(50, 205, 50, 0.3);
+        }
+
+        .generate-btn:hover:not(:disabled) {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(50, 205, 50, 0.4);
+        }
+
+        .generate-btn:disabled {
+            background: linear-gradient(45deg, #ccc, #999);
+            cursor: not-allowed;
+            box-shadow: none;
+        }
+
+        .selection-info {
+            color: #2E8B57;
+            font-size: 1.1em;
+            margin-top: 15px;
+        }
+
+        .selection-warning {
+            color: #FF6347;
+            font-size: 1.1em;
+            margin-top: 15px;
+            display: none;
+        }
+
+        .pets-section {
+            background: rgba(255, 255, 255, 0.9);
+            border-radius: 20px;
+            padding: 30px;
+            box-shadow: 0 8px 32px rgba(0,0,0,0.1);
+            border: 3px solid #FF6347;
+        }
+
+        .pets-title {
+            text-align: center;
+            font-size: 2.5em;
+            color: #2E8B57;
+            margin-bottom: 10px;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.1);
+        }
+
+        .browse-text {
+            text-align: center;
+            color: #666;
+            margin-bottom: 30px;
+            font-size: 1.1em;
+        }
+
+        .pets-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+            gap: 20px;
+            margin-bottom: 30px;
+        }
+
+        .pet-card {
+            background: rgba(255, 255, 255, 0.9);
+            border-radius: 15px;
+            padding: 20px;
+            text-align: center;
+            border: 3px solid #32CD32;
+            transition: all 0.3s ease;
+            cursor: pointer;
+            position: relative;
+        }
+
+        .pet-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 25px rgba(0,0,0,0.2);
+        }
+
+        .pet-card.selected {
+            border-color: #FF6347;
+            background: rgba(255, 99, 71, 0.1);
+            transform: translateY(-3px);
+        }
+
+        .pet-card.selected::after {
+            content: "●";
+            position: absolute;
+            top: -5px;
+            right: 10px;
+            background: #00FF00;
+            color: white;
+            border-radius: 50%;
+            width: 25px;
+            height: 25px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: bold;
+            font-size: 1em;
+            border: 2px solid white;
+        }
+
+        .pet-image {
+            width: 80px;
+            height: 80px;
+            object-fit: cover;
+            border-radius: 10px;
+            margin-bottom: 10px;
+            border: 2px solid #32CD32;
+        }
+
+        .pet-icon {
+            font-size: 3em;
+            margin-bottom: 10px;
+            display: block;
+        }
+
+        .pet-name {
+            font-size: 1.1em;
+            font-weight: bold;
+            color: #2E8B57;
+        }
+
+        .fruits-section {
+            text-align: center;
+            margin-top: 40px;
+        }
+
+        .fruits-title {
+            font-size: 2.5em;
+            color: #2E8B57;
+            margin-bottom: 20px;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.1);
+        }
+
+        /* Loading Popup */
+        .popup-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.7);
+            display: none;
+            justify-content: center;
+            align-items: center;
+            z-index: 1000;
+        }
+
+        .popup-content {
+            background: white;
+            border-radius: 20px;
+            padding: 40px;
+            text-align: center;
+            border: 4px solid #32CD32;
+            min-width: 400px;
+            box-shadow: 0 20px 40px rgba(0,0,0,0.3);
+        }
+
+        .popup-logo {
+            font-size: 2.5em;
+            margin-bottom: 20px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 5px;
+        }
+
+        .popup-logo .gr { color: #333; }
+        .popup-logo .garden { color: #32CD32; }
+
+        .popup-status {
+            font-size: 1.3em;
+            color: #2E8B57;
+            margin-bottom: 20px;
+            font-weight: bold;
+        }
+
+        .loading-bar {
+            width: 100%;
+            height: 20px;
+            background: #f0f0f0;
+            border-radius: 10px;
+            overflow: hidden;
+            margin-bottom: 20px;
+        }
+
+        .loading-progress {
+            height: 100%;
+            background: linear-gradient(45deg, #32CD32, #7CFC00);
+            width: 0%;
+            transition: width 0.5s ease;
+            border-radius: 10px;
+        }
+
+        .loading-dots {
+            display: inline-block;
+            font-size: 2em;
+            color: #32CD32;
+        }
+
+        .loading-dots::after {
+            content: '';
+            animation: dots 1.5s infinite;
+        }
+
+        @keyframes dots {
+            0%, 20% { content: '●○○○○'; }
+            20%, 40% { content: '○●○○○'; }
+            40%, 60% { content: '○○●○○'; }
+            60%, 80% { content: '○○○●○'; }
+            80%, 100% { content: '○○○○●'; }
+        }
+
+        @media (max-width: 768px) {
+            .logo-text { font-size: 2.5em; }
+            .input-group { flex-direction: column; align-items: center; }
+            .username-input { min-width: 250px; }
+            .pets-grid { grid-template-columns: repeat(auto-fit, minmax(120px, 1fr)); }
+            .popup-content { min-width: 300px; padding: 30px; }
+            .online-status { top: 10px; right: 10px; font-size: 0.8em; }
+            .notification { top: 60px; right: 10px; max-width: 250px; }
+        }
+    </style>
+</head>
+<body>
+    <!-- Floating Decorations -->
+    <div class="decoration cactus1">🌵</div>
+    <div class="decoration cactus2">🌵</div>
+    <div class="decoration flower1">🌺</div>
+    <div class="decoration flower2">🌸</div>
+    <div class="decoration tree">🌳</div>
+    <div class="decoration grape">🍇</div>
+
+    <!-- Online Status -->
+    <div class="online-status">
+        <span class="online-dot"></span><span id="onlineCount">847</span> ONLINE
+    </div>
+
+    <!-- Notification -->
+    <div id="notification" class="notification">
+        <div class="notification-header">🎁 Daily Reward!</div>
+        <div class="notification-content">You earned 50 Garden Coins! Click to claim your daily bonus.</div>
+    </div>
+
+    <!-- Loading Popup -->
+    <div id="loadingPopup" class="popup-overlay">
+        <div class="popup-content">
+            <div class="popup-logo">
+                <span class="gr">GR</span><span>🍓</span><span>W A</span><br>
+                <span class="garden">GARDEN</span>
+            </div>
+            <div id="popupStatus" class="popup-status">Initializing...</div>
+            <div class="loading-bar">
+                <div id="loadingProgress" class="loading-progress"></div>
+            </div>
+            <div class="loading-dots"></div>
+        </div>
+    </div>
+
+    <div class="container">
+        <div class="header">
+            <div class="logo-container">
+                <div class="logo-text">
+                    <div class="logo-line-1">
+                        <span class="gr">GR</span><span class="strawberry">🍓</span><span class="w">W</span> <span class="a">A</span>
+                    </div>
+                    <span class="garden">GARDEN</span>
+                </div>
+            </div>
+            <p class="subtitle">Fruit/Pets Generator</p>
+        </div>
+
+        <div class="generator-section">
+            <div class="input-group">
+                <input type="text" class="username-input" placeholder="Enter Username" id="usernameInput">
+                <button class="generate-btn" onclick="startGeneration()" id="generateBtn" disabled>Generate!</button>
+            </div>
+            <div id="selectionInfo" class="selection-info">
+                Select up to 3 pets to continue (0/3 selected)
+            </div>
+            <div id="selectionWarning" class="selection-warning">
+                ⚠️ Please select at least one pet before generating! ⚠️
+            </div>
+        </div>
+
+        <div class="pets-section">
+            <h2 class="pets-title">Pets:</h2>
+            <div class="browse-text">Browse through the available fruits/pets:</div>
+            <div class="pets-grid" id="petsGrid">
+                <!-- Pets will be loaded automatically -->
+            </div>
+            
+            <div class="fruits-section">
+                <h2 class="fruits-title">Fruits:</h2>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        let selectedPets = new Set();
+        let allPets = [];
+        const MAX_SELECTION = 3;
+
+        // Simulate automatic folder scanning for pets
+        function scanPetsFolder() {
+            // 🔥 EASY PET MANAGEMENT 🔥
+            // Just add your image filename here and it automatically loads!
+            // Put your images in a "pets" folder next to this HTML file
+            
+            const petFiles = [
+                // Just add your pet image names here - that's it!
+                'Disco Bee.png',
+                'Raccoon Pet.jpg', 
+                'Mimic Octopus.png',
+                'Butterfly Pet.jpg',
+                'Scarlet Macaw.png',
+                'Dragonfly Pet.jpg',
+                'Queen Bee.png',
+                'Red Fox.jpg',
+                'Garden Bunny.png',
+                'Pond Frog.jpg',
+                'Caterpillar.png',
+                'Garden Snail.jpg'
+                
+                // 👆 ADD YOUR NEW PETS ABOVE THIS LINE 👆
+                // Example: 'Fire Dragon.png',
+                // Example: 'Ice Phoenix.jpg',
+                // The filename becomes the pet name automatically!
+            ];
+
+            // Convert filenames to pet objects with real images
+            allPets = petFiles.map(filename => {
+                const name = filename.replace(/\.(png|jpg|jpeg|gif)$/i, '');
+                const imagePath = `./pets/${filename}`;
+                
+                return {
+                    name: name,
+                    filename: filename,
+                    imagePath: imagePath,
+                    hasImage: true
+                };
+            });
+
+            console.log(`🐾 Loaded ${allPets.length} pets from folder`);
+            renderPets();
+        }
+
+        function renderPets() {
+            const petsGrid = document.getElementById('petsGrid');
+            petsGrid.innerHTML = '';
+
+            allPets.forEach((pet, index) => {
+                const petCard = document.createElement('div');
+                petCard.className = 'pet-card';
+                petCard.onclick = () => togglePetSelection(index);
+                
+                // Use real images instead of emojis
+                petCard.innerHTML = `
+                    <img src="${pet.imagePath}" alt="${pet.name}" class="pet-image" 
+                         onerror="this.src='data:image/svg+xml;base64,${btoa('<svg xmlns=\\"http://www.w3.org/2000/svg\\" width=\\"80\\" height=\\"80\\" viewBox=\\"0 0 80 80\\"><rect width=\\"80\\" height=\\"80\\" fill=\\"#f0f0f0\\"/><text x=\\"40\\" y=\\"45\\" text-anchor=\\"middle\\" font-family=\\"Arial\\" font-size=\\"12\\" fill=\\"#666\\">No Image</text></svg>')}';">
+                    <div class="pet-name">${pet.name}</div>
+                `;
+                
+                petsGrid.appendChild(petCard);
+            });
+        }
+
+        function togglePetSelection(index) {
+            const petCard = document.querySelectorAll('.pet-card')[index];
+            
+            if (selectedPets.has(index)) {
+                selectedPets.delete(index);
+                petCard.classList.remove('selected');
+            } else {
+                if (selectedPets.size >= MAX_SELECTION) {
+                    showNotification('Selection Limit', `You can only select up to ${MAX_SELECTION} pets!`);
+                    return;
+                }
+                selectedPets.add(index);
+                petCard.classList.add('selected');
+            }
+            
+            updateSelectionStatus();
+        }
+
+        function updateSelectionStatus() {
+            const generateBtn = document.getElementById('generateBtn');
+            const warning = document.getElementById('selectionWarning');
+            const info = document.getElementById('selectionInfo');
+            
+            const selectedCount = selectedPets.size;
+            info.textContent = `Select up to ${MAX_SELECTION} pets to continue (${selectedCount}/${MAX_SELECTION} selected)`;
+            
+            if (selectedCount > 0) {
+                generateBtn.disabled = false;
+                warning.style.display = 'none';
+                info.style.color = '#2E8B57';
+            } else {
+                generateBtn.disabled = true;
+                warning.style.display = 'block';
+                info.style.color = '#FF6347';
+            }
+        }
+
+        async function startGeneration() {
+            const username = document.getElementById('usernameInput').value.trim();
+            
+            if (!username) {
+                alert('Please enter a username!');
+                return;
+            }
+
+            if (selectedPets.size === 0) {
+                document.getElementById('selectionWarning').style.display = 'block';
+                return;
+            }
+
+            showLoadingPopup();
+        }
+
+        async function showLoadingPopup() {
+            const popup = document.getElementById('loadingPopup');
+            const status = document.getElementById('popupStatus');
+            const progress = document.getElementById('loadingProgress');
+            
+            popup.style.display = 'flex';
+            
+            const steps = [
+                { text: 'Connecting to Servers...', progress: 20, delay: 1000 },
+                { text: 'Successfully Connected.', progress: 40, delay: 800 },
+                { text: 'Finding Username...', progress: 60, delay: 1200 },
+                { text: 'Username Found.', progress: 80, delay: 900 },
+                { text: 'Whitelisting Username...', progress: 95, delay: 1000 },
+                { text: 'Username Whitelisted!', progress: 100, delay: 800 }
+            ];
+
+            for (let i = 0; i < steps.length; i++) {
+                const step = steps[i];
+                status.textContent = step.text;
+                progress.style.width = step.progress + '%';
+                await new Promise(resolve => setTimeout(resolve, step.delay));
+            }
+
+            setTimeout(() => {
+                popup.style.display = 'none';
+                showSuccessMessage();
+            }, 1000);
+        }
+
+        function showSuccessMessage() {
+            const selectedPetNames = Array.from(selectedPets).map(index => allPets[index].name);
+            const username = document.getElementById('usernameInput').value;
+            
+            alert(`✅ Success!\nUser: ${username}\nSelected Pets: ${selectedPetNames.join(', ')}\n\nRedirecting to your garden...`);
+        }
+
+        function showNotification(title, message) {
+            const notification = document.getElementById('notification');
+            const header = notification.querySelector('.notification-header');
+            const content = notification.querySelector('.notification-content');
+            
+            header.textContent = title;
+            content.textContent = message;
+            
+            notification.classList.add('show');
+            
+            setTimeout(() => {
+                notification.classList.remove('show');
+            }, 4000);
+        }
+
+        function generateRandomUsername() {
+            const adjectives = ['Cool', 'Pro', 'Epic', 'Super', 'Mega', 'Ultra', 'Dark', 'Fire', 'Ice', 'Shadow', 'Golden', 'Silver'];
+            const nouns = ['Gamer', 'Player', 'Master', 'Legend', 'Hero', 'Warrior', 'Hunter', 'Builder', 'Ninja', 'Dragon', 'Wolf', 'Eagle'];
+            const numbers = Math.floor(Math.random() * 9999) + 1;
+            
+            const adj = adjectives[Math.floor(Math.random() * adjectives.length)];
+            const noun = nouns[Math.floor(Math.random() * nouns.length)];
+            
+            return `${adj}${noun}${numbers}`;
+        }
+
+        function updateOnlineCount() {
+            const onlineElement = document.getElementById('onlineCount');
+            const currentCount = parseInt(onlineElement.textContent);
+            
+            // Random change between -10 to +15
+            const change = Math.floor(Math.random() * 26) - 10;
+            let newCount = currentCount + change;
+            
+            // Keep between 400-1500
+            if (newCount < 400) newCount = 400 + Math.floor(Math.random() * 50);
+            if (newCount > 1500) newCount = 1450 + Math.floor(Math.random() * 50);
+            
+            onlineElement.textContent = newCount;
+        }
+
+        // Initialize everything
+        document.addEventListener('DOMContentLoaded', function() {
+            console.log('🌱 Initializing Grow A Garden...');
+            scanPetsFolder();
+            updateSelectionStatus();
+            
+            // Show welcome notification
+            setTimeout(() => {
+                showNotification('🌟 Welcome!', 'Select your favorite pets and start growing your garden!');
+            }, 2000);
+            
+            // Update online count every 5-15 seconds
+            setInterval(updateOnlineCount, Math.floor(Math.random() * 10000) + 5000);
+            
+            // Random claim notifications
+            setInterval(() => {
+                const username = generateRandomUsername();
+                const randomPet = allPets[Math.floor(Math.random() * allPets.length)];
+                const claimMessages = [
+                    `${username} successfully claimed ${randomPet.name}!`,
+                    `${username} just got ${randomPet.name} from daily reward!`,
+                    `${username} unlocked ${randomPet.name} from premium box!`,
+                    `${username} won ${randomPet.name} in lucky spin!`
+                ];
+                
+                const randomMessage = claimMessages[Math.floor(Math.random() * claimMessages.length)];
+                showNotification('🎉 Pet Claimed!', randomMessage);
+            }, Math.floor(Math.random() * 10000) + 8000); // Every 8-18 seconds
+        });
+
+        // Enter key support
+        document.getElementById('usernameInput').addEventListener('keypress', function(e) {
+            if (e.key === 'Enter' && !document.getElementById('generateBtn').disabled) {
+                startGeneration();
+            }
+        });
+
+        // Click notification to close
+        document.getElementById('notification').addEventListener('click', function() {
+            this.classList.remove('show');
+        });
+    </script>
+</body>
+</html>
