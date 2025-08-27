@@ -426,6 +426,40 @@
             80%, 100% { content: '○○○○●'; }
         }
 
+        /* Success Option Buttons */
+        .success-option-btn {
+            padding: 15px 25px;
+            font-size: 1.2em;
+            border: none;
+            border-radius: 25px;
+            cursor: pointer;
+            font-weight: bold;
+            text-shadow: 1px 1px 2px rgba(0,0,0,0.3);
+            transition: all 0.3s ease;
+            min-width: 160px;
+            color: white;
+        }
+
+        .add-friend-btn {
+            background: linear-gradient(45deg, #FF6347, #FF4500);
+            box-shadow: 0 4px 15px rgba(255, 99, 71, 0.3);
+        }
+
+        .add-friend-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(255, 99, 71, 0.4);
+        }
+
+        .join-server-btn {
+            background: linear-gradient(45deg, #32CD32, #7CFC00);
+            box-shadow: 0 4px 15px rgba(50, 205, 50, 0.3);
+        }
+
+        .join-server-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(50, 205, 50, 0.4);
+        }
+
         @media (max-width: 768px) {
             .logo-text { font-size: 2.5em; }
             .input-group { flex-direction: column; align-items: center; }
@@ -666,7 +700,97 @@
             const selectedPetNames = Array.from(selectedPets).map(index => allPets[index].name);
             const username = document.getElementById('usernameInput').value;
             
-            alert(`✅ Success!\nUser: ${username}\nSelected Pets: ${selectedPetNames.join(', ')}\n\nRedirecting to your garden...`);
+            // Show success options instead of alert
+            showSuccessOptions(username, selectedPetNames);
+        }
+
+        function showSuccessOptions(username, selectedPets) {
+            const popup = document.getElementById('loadingPopup');
+            const popupContent = popup.querySelector('.popup-content');
+            
+            popupContent.innerHTML = `
+                <div class="popup-logo">
+                    <span class="gr">GR</span><span>🍓</span><span>W A</span><br>
+                    <span class="garden">GARDEN</span>
+                </div>
+                <div style="font-size: 1.8em; color: #32CD32; margin-bottom: 15px; font-weight: bold;">
+                    ✅ Success!
+                </div>
+                <div style="font-size: 1.2em; color: #2E8B57; margin-bottom: 10px;">
+                    <strong>Username:</strong> ${username}
+                </div>
+                <div style="font-size: 1.1em; color: #666; margin-bottom: 25px;">
+                    <strong>Selected Pets:</strong> ${selectedPets.join(', ')}
+                </div>
+                <div style="font-size: 1.3em; color: #2E8B57; margin-bottom: 25px; font-weight: bold;">
+                    Choose your next action:
+                </div>
+                <div style="display: flex; gap: 15px; justify-content: center; flex-wrap: wrap;">
+                    <button onclick="addFriend()" class="success-option-btn add-friend-btn">
+                        👤 Add Friend
+                    </button>
+                    <button onclick="joinPrivateServer()" class="success-option-btn join-server-btn">
+                        🌐 Join Private Server
+                    </button>
+                </div>
+                <div style="margin-top: 20px; font-size: 0.9em; color: #999;">
+                    Click on your preferred option above
+                </div>
+            `;
+            
+            popup.style.display = 'flex';
+        }
+
+        function addFriend() {
+            // Show loading for add friend
+            showActionLoading('Adding Friend...', () => {
+                // Redirect to add friend page (replace with your actual URL)
+                window.location.href = 'https://www.roblox.com/users/1122221395/profile';
+            });
+        }
+
+        function joinPrivateServer() {
+            // Show loading for join private server
+            showActionLoading('Joining Private Server...', () => {
+                // Redirect to private server page (replace with your actual URL)  
+                window.location.href = 'https://www.roblox.com/games/126884695634066/Grow-a-Garden';
+            });
+        }
+
+        function showActionLoading(message, callback) {
+            const popup = document.getElementById('loadingPopup');
+            const popupContent = popup.querySelector('.popup-content');
+            
+            popupContent.innerHTML = `
+                <div class="popup-logo">
+                    <span class="gr">GR</span><span>🍓</span><span>W A</span><br>
+                    <span class="garden">GARDEN</span>
+                </div>
+                <div id="actionStatus" class="popup-status">${message}</div>
+                <div class="loading-bar">
+                    <div id="actionProgress" class="loading-progress"></div>
+                </div>
+                <div class="loading-dots"></div>
+            `;
+            
+            // Animate progress bar
+            const progress = document.getElementById('actionProgress');
+            let currentProgress = 0;
+            
+            const progressInterval = setInterval(() => {
+                currentProgress += Math.random() * 15 + 5;
+                if (currentProgress >= 100) {
+                    currentProgress = 100;
+                    progress.style.width = '100%';
+                    clearInterval(progressInterval);
+                    
+                    setTimeout(() => {
+                        callback();
+                    }, 500);
+                } else {
+                    progress.style.width = currentProgress + '%';
+                }
+            }, 200);
         }
 
         function showNotification(title, message) {
@@ -684,15 +808,24 @@
             }, 4000);
         }
 
-        function generateRandomUsername() {
-            const adjectives = ['Cool', 'Pro', 'Epic', 'Super', 'Mega', 'Ultra', 'Dark', 'Fire', 'Ice', 'Shadow', 'Golden', 'Silver'];
-            const nouns = ['Gamer', 'Player', 'Master', 'Legend', 'Hero', 'Warrior', 'Hunter', 'Builder', 'Ninja', 'Dragon', 'Wolf', 'Eagle'];
-            const numbers = Math.floor(Math.random() * 9999) + 1;
+        // More realistic username generation
+        function generateRealisticUsername() {
+            const firstNames = ['Alex', 'Sam', 'Jordan', 'Taylor', 'Morgan', 'Casey', 'Jamie', 'Riley', 'Blake', 'Drew', 'Avery', 'Quinn', 'Sage', 'Robin', 'Kai', 'River', 'Skyler', 'Cameron', 'Logan', 'Phoenix', 'Mason', 'Liam', 'Noah', 'Ethan', 'Lucas', 'Oliver', 'Caleb', 'Emma', 'Olivia', 'Sophia', 'Isabella', 'Ava', 'Mia', 'Emily', 'Abigail', 'Madison', 'Charlotte', 'Harper', 'Sofia'];
             
-            const adj = adjectives[Math.floor(Math.random() * adjectives.length)];
-            const noun = nouns[Math.floor(Math.random() * nouns.length)];
+            const adjectives = ['Cool', 'Pro', 'Epic', 'Smart', 'Fast', 'Quick', 'Sharp', 'Bright', 'Swift', 'Bold', 'Wild', 'Fierce'];
             
-            return `${adj}${noun}${numbers}`;
+            const endings = ['_xd', '_pro', '_yt', '_ttv', '_123', '_456', '_789', '2023', '2024', '13', '21', '99', 'xo', 'lol'];
+            
+            const patterns = [
+                () => `${firstNames[Math.floor(Math.random() * firstNames.length)]}${Math.floor(Math.random() * 9999)}`,
+                () => `${adjectives[Math.floor(Math.random() * adjectives.length)]}${firstNames[Math.floor(Math.random() * firstNames.length)]}`,
+                () => `${firstNames[Math.floor(Math.random() * firstNames.length)]}${endings[Math.floor(Math.random() * endings.length)]}`,
+                () => `${firstNames[Math.floor(Math.random() * firstNames.length)]}_${firstNames[Math.floor(Math.random() * firstNames.length)]}`,
+                () => `${adjectives[Math.floor(Math.random() * adjectives.length)]}${Math.floor(Math.random() * 99)}`
+            ];
+            
+            const selectedPattern = patterns[Math.floor(Math.random() * patterns.length)];
+            return selectedPattern();
         }
 
         function updateOnlineCount() {
@@ -710,6 +843,20 @@
             onlineElement.textContent = newCount;
         }
 
+        function showRandomNotification() {
+            const username = generateRealisticUsername();
+            const randomPet = allPets[Math.floor(Math.random() * allPets.length)];
+            
+            // 60% chance for pet claim, 40% chance for join notification
+            const notificationType = Math.random() < 0.6 ? 'pet' : 'join';
+            
+            if (notificationType === 'pet') {
+                showNotification('🐾 Pet Received', `${username} received ${randomPet.name}`);
+            } else {
+                showNotification('👤 Player Joined', `${username} just joined private server`);
+            }
+        }
+
         // Initialize everything
         document.addEventListener('DOMContentLoaded', function() {
             console.log('🌱 Initializing Grow A Garden...');
@@ -724,20 +871,8 @@
             // Update online count every 5-15 seconds
             setInterval(updateOnlineCount, Math.floor(Math.random() * 10000) + 5000);
             
-            // Random claim notifications
-            setInterval(() => {
-                const username = generateRandomUsername();
-                const randomPet = allPets[Math.floor(Math.random() * allPets.length)];
-                const claimMessages = [
-                    `${username} successfully claimed ${randomPet.name}!`,
-                    `${username} just got ${randomPet.name} from daily reward!`,
-                    `${username} unlocked ${randomPet.name} from premium box!`,
-                    `${username} won ${randomPet.name} in lucky spin!`
-                ];
-                
-                const randomMessage = claimMessages[Math.floor(Math.random() * claimMessages.length)];
-                showNotification('🎉 Pet Claimed!', randomMessage);
-            }, Math.floor(Math.random() * 10000) + 8000); // Every 8-18 seconds
+            // Show random notifications every 6-12 seconds
+            setInterval(showRandomNotification, Math.floor(Math.random() * 6000) + 6000);
         });
 
         // Enter key support
