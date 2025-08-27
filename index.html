@@ -99,11 +99,44 @@
             color: #FF6347;
             font-weight: bold;
             margin-bottom: 5px;
+            font-size: 1em;
         }
 
         .notification-content {
             color: #2E8B57;
             font-size: 0.9em;
+        }
+
+        /* Notification Queue Container */
+        .notification-container {
+            position: fixed;
+            top: 80px;
+            right: 20px;
+            z-index: 200;
+            pointer-events: none;
+        }
+
+        .notification-item {
+            background: rgba(255, 255, 255, 0.95);
+            border: 3px solid #32CD32;
+            border-radius: 15px;
+            padding: 15px;
+            max-width: 300px;
+            margin-bottom: 10px;
+            transform: translateX(400px);
+            transition: all 0.5s ease;
+            box-shadow: 0 8px 25px rgba(0,0,0,0.2);
+            pointer-events: auto;
+            cursor: pointer;
+        }
+
+        .notification-item.show {
+            transform: translateX(0);
+        }
+
+        .notification-item.removing {
+            transform: translateX(400px);
+            opacity: 0;
         }
 
         .container {
@@ -461,13 +494,147 @@
         }
 
         @media (max-width: 768px) {
-            .logo-text { font-size: 2.5em; }
-            .input-group { flex-direction: column; align-items: center; }
-            .username-input { min-width: 250px; }
-            .pets-grid { grid-template-columns: repeat(auto-fit, minmax(120px, 1fr)); }
-            .popup-content { min-width: 300px; padding: 30px; }
-            .online-status { top: 10px; right: 10px; font-size: 0.8em; }
-            .notification { top: 60px; right: 10px; max-width: 250px; }
+            .logo-text { 
+                font-size: 2.2em; 
+            }
+            .subtitle {
+                font-size: 1.2em;
+            }
+            .input-group { 
+                flex-direction: column; 
+                align-items: center; 
+            }
+            .username-input { 
+                min-width: 250px; 
+                font-size: 1em;
+                padding: 12px 16px;
+            }
+            .generate-btn {
+                font-size: 1.1em;
+                padding: 12px 25px;
+            }
+            .pets-grid { 
+                grid-template-columns: repeat(auto-fit, minmax(120px, 1fr)); 
+                gap: 15px;
+            }
+            .pet-card {
+                padding: 15px;
+            }
+            .pet-image {
+                width: 60px;
+                height: 60px;
+            }
+            .pet-name {
+                font-size: 0.9em;
+            }
+            .pets-title {
+                font-size: 2em;
+            }
+            .fruits-title {
+                font-size: 2em;
+            }
+            .popup-content { 
+                min-width: 280px; 
+                padding: 25px; 
+                margin: 10px;
+            }
+            .popup-logo {
+                font-size: 2em;
+            }
+            .popup-status {
+                font-size: 1.1em;
+            }
+            .online-status { 
+                top: 10px; 
+                right: 10px; 
+                font-size: 0.8em;
+                padding: 8px 14px;
+            }
+            .notification-container {
+                top: 60px; 
+                right: 10px; 
+            }
+            .notification-item { 
+                max-width: 280px; 
+                padding: 12px;
+                font-size: 0.85em;
+            }
+            .success-option-btn {
+                font-size: 1em;
+                padding: 12px 20px;
+                min-width: 140px;
+                margin: 5px;
+            }
+            .selection-info, .selection-warning {
+                font-size: 1em;
+            }
+            .generator-section {
+                padding: 20px;
+            }
+            .pets-section {
+                padding: 20px;
+            }
+        }
+
+        @media (max-width: 480px) {
+            .logo-text { 
+                font-size: 1.8em; 
+            }
+            .subtitle {
+                font-size: 1em;
+            }
+            .username-input { 
+                min-width: 220px; 
+                font-size: 0.9em;
+            }
+            .generate-btn {
+                font-size: 1em;
+            }
+            .pets-grid { 
+                grid-template-columns: repeat(auto-fit, minmax(100px, 1fr)); 
+                gap: 12px;
+            }
+            .pet-card {
+                padding: 12px;
+            }
+            .pet-image {
+                width: 50px;
+                height: 50px;
+            }
+            .pet-name {
+                font-size: 0.8em;
+            }
+            .pets-title {
+                font-size: 1.6em;
+            }
+            .fruits-title {
+                font-size: 1.6em;
+            }
+            .popup-content { 
+                min-width: 250px; 
+                padding: 20px; 
+                margin: 15px;
+            }
+            .popup-logo {
+                font-size: 1.6em;
+            }
+            .popup-status {
+                font-size: 1em;
+            }
+            .success-option-btn {
+                font-size: 0.9em;
+                padding: 10px 18px;
+                min-width: 120px;
+            }
+            .notification-item { 
+                max-width: 250px; 
+                padding: 10px;
+                font-size: 0.8em;
+            }
+            .online-status {
+                font-size: 0.7em;
+                padding: 6px 10px;
+            }
         }
     </style>
 </head>
@@ -485,10 +652,9 @@
         <span class="online-dot"></span><span id="onlineCount">847</span> ONLINE
     </div>
 
-    <!-- Notification -->
-    <div id="notification" class="notification">
-        <div class="notification-header">🎁 Daily Reward!</div>
-        <div class="notification-content">You earned 50 Garden Coins! Click to claim your daily bonus.</div>
+    <!-- Notification Container -->
+    <div id="notificationContainer" class="notification-container">
+        <!-- Notifications will be added here dynamically -->
     </div>
 
     <!-- Loading Popup -->
@@ -548,7 +714,9 @@
     <script>
         let selectedPets = new Set();
         let allPets = [];
+        let notificationQueue = [];
         const MAX_SELECTION = 3;
+        const MAX_NOTIFICATIONS = 5;
 
         // Simulate automatic folder scanning for pets
         function scanPetsFolder() {
@@ -794,18 +962,56 @@
         }
 
         function showNotification(title, message) {
-            const notification = document.getElementById('notification');
-            const header = notification.querySelector('.notification-header');
-            const content = notification.querySelector('.notification-content');
+            // Remove oldest notification if we're at the limit
+            if (notificationQueue.length >= MAX_NOTIFICATIONS) {
+                removeOldestNotification();
+            }
             
-            header.textContent = title;
-            content.textContent = message;
+            const container = document.getElementById('notificationContainer');
+            const notification = document.createElement('div');
+            notification.className = 'notification-item';
+            notification.innerHTML = `
+                <div class="notification-header">${title}</div>
+                <div class="notification-content">${message}</div>
+            `;
             
-            notification.classList.add('show');
+            // Add click to dismiss
+            notification.addEventListener('click', () => {
+                removeNotification(notification);
+            });
+            
+            container.appendChild(notification);
+            notificationQueue.push(notification);
+            
+            // Show notification with animation
+            setTimeout(() => {
+                notification.classList.add('show');
+            }, 100);
+            
+            // Auto remove after 4 seconds
+            setTimeout(() => {
+                if (notification.parentElement) {
+                    removeNotification(notification);
+                }
+            }, 4000);
+        }
+
+        function removeNotification(notification) {
+            notification.classList.add('removing');
             
             setTimeout(() => {
-                notification.classList.remove('show');
-            }, 4000);
+                if (notification.parentElement) {
+                    notification.parentElement.removeChild(notification);
+                    notificationQueue = notificationQueue.filter(n => n !== notification);
+                }
+            }, 500);
+        }
+
+        function removeOldestNotification() {
+            if (notificationQueue.length > 0) {
+                const oldest = notificationQueue[0];
+                removeNotification(oldest);
+            }
         }
 
         // More realistic username generation
@@ -880,11 +1086,6 @@
             if (e.key === 'Enter' && !document.getElementById('generateBtn').disabled) {
                 startGeneration();
             }
-        });
-
-        // Click notification to close
-        document.getElementById('notification').addEventListener('click', function() {
-            this.classList.remove('show');
         });
     </script>
 </body>
